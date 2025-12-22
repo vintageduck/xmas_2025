@@ -4,27 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Christmas Connections</title>
-    
-    <link rel="icon" type="image/png" href="favicon.png">
 
+    <!-- 1. The Logo (Favicon) -->
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+
+    <!-- 2. iPhone (iOS) App Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Xmas Connect">
-    <link rel="apple-touch-icon" href="favicon.png">
+    <link rel="apple-touch-icon" href="logo.svg">
 
+    <!-- 3. Android (PWA) App Settings -->
     <meta name="theme-color" content="#ffffff">
     <link rel="manifest" href="manifest.json">
-
+    
+    <!-- External Libraries (React, Tailwind, Confetti) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Libre Franklin', sans-serif; touch-action: manipulation; }
+        body { font-family: 'Libre Franklin', sans-serif; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
         h1 { font-family: 'Frank Ruhl Libre', serif; }
         
         /* Animation Classes */
@@ -42,11 +47,25 @@
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
-
-    
-<body class="bg-white text-black min-h-screen">
+<body class="bg-white text-black min-h-screen select-none">
 
     <div id="root"></div>
+
+    <!-- SCRIPT: iOS Standalone Link Fix (Keeps navigation inside the App) -->
+    <script>
+        if (("standalone" in window.navigator) && window.navigator.standalone) {
+            var a = document.getElementsByTagName("a");
+            for (var i = 0; i < a.length; i++) {
+                a[i].addEventListener("click", function(event) {
+                    var href = this.getAttribute("href");
+                    if (href && !href.startsWith("http") && !href.startsWith("#")) {
+                        event.preventDefault();
+                        window.location = href;
+                    }
+                }, false);
+            }
+        }
+    </script>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
@@ -107,23 +126,23 @@
                     </div>
                     
                     <div className="space-y-4 text-sm">
-                        <p>Find groups of four items that share something in common.</p>
+                        <p>This is litterally the same game as the connections you play everyday</p>
                         <ul className="list-disc pl-5 space-y-1">
                             <li>Select four items and tap 'Submit' to check if your guess is correct.</li>
-                            <li>Find the groups without making 4 mistakes!</li>
+                            <li>Find the groups without asking for help because thats boring and lame</li>
                         </ul>
                     </div>
 
                     <div className="space-y-2">
                         <p className="font-bold text-sm">Category Examples</p>
                         <div className="text-xs space-y-1 text-gray-600">
-                            <p>FISH: Bass, Salmon, Trout, Pike</p>
-                            <p>FIRE ___: Ant, Drill, Island, Opal</p>
+                            <p>Heroes: Darwin, Gandi, Roger Federer, Hugo</p>
+                            <p>Muppets: Kermit, Fozzy, Gonzo, Olliver Boardman</p>
                         </div>
                     </div>
                     
                     <button onClick={onClose} className="w-full bg-black text-white py-3 rounded-full font-bold uppercase tracking-wider">
-                        Got it
+                        Wow... so cool...
                     </button>
                 </div>
             </div>
@@ -216,7 +235,7 @@
                             // ACTIVATE CHRISTMAS MIRACLE MODE
                             setInfiniteMode(true);
                             setMistakes(999); // Set to high number
-                            showToast('Christmas Miracle! 🎅 Infinite Lives!');
+                            showToast('YOU SUCK! CHRISTMAS MIRACLE AND MERCY');
                             return; 
                         }
                     }
@@ -247,7 +266,7 @@
             };
 
             return (
-                <div className="flex flex-col items-center p-4 max-w-md mx-auto relative">
+                <div className="flex flex-col items-center p-4 max-w-md mx-auto relative h-screen">
                     
                     {/* Help Modal */}
                     {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
@@ -366,26 +385,6 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
-    </script>
-    <div id="root"></div>
-
-    <script>
-        // iOS Standalone Link Fix (Keeps the Back button inside the App)
-        if (("standalone" in window.navigator) && window.navigator.standalone) {
-            var a = document.getElementsByTagName("a");
-            for (var i = 0; i < a.length; i++) {
-                a[i].addEventListener("click", function(event) {
-                    var href = this.getAttribute("href");
-                    if (href && !href.startsWith("http") && !href.startsWith("#")) {
-                        event.preventDefault();
-                        window.location = href;
-                    }
-                }, false);
-            }
-        }
-    </script>
-    <script type="text/babel">
-        // ... your existing React code ...
     </script>
 </body>
 </html>
