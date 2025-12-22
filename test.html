@@ -5,14 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Christmas Connections</title>
     
-    <!-- External Libraries (React, Tailwind, Confetti) -->
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Xmas Connect">
+    <link rel="apple-touch-icon" href="favicon.png">
+
+    <meta name="theme-color" content="#ffffff">
+    <link rel="manifest" href="manifest.json">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
 
     <style>
@@ -34,6 +42,8 @@
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
+
+    
 <body class="bg-white text-black min-h-screen">
 
     <div id="root"></div>
@@ -356,6 +366,26 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
+    </script>
+    <div id="root"></div>
+
+    <script>
+        // iOS Standalone Link Fix (Keeps the Back button inside the App)
+        if (("standalone" in window.navigator) && window.navigator.standalone) {
+            var a = document.getElementsByTagName("a");
+            for (var i = 0; i < a.length; i++) {
+                a[i].addEventListener("click", function(event) {
+                    var href = this.getAttribute("href");
+                    if (href && !href.startsWith("http") && !href.startsWith("#")) {
+                        event.preventDefault();
+                        window.location = href;
+                    }
+                }, false);
+            }
+        }
+    </script>
+    <script type="text/babel">
+        // ... your existing React code ...
     </script>
 </body>
 </html>
