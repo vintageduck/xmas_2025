@@ -5,19 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Christmas Connections</title>
 
-    <link rel="icon" type="image/png" href="favicon.png">
+    <!-- 1. The Logo (Favicon) -->
+    <!-- Using the SVG directly as favicon for simplicity, or you can save a PNG version -->
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
 
+    <!-- 2. iPhone (iOS) App Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Xmas Connect">
-    <link rel="apple-touch-icon" href="favicon.png">
+    <link rel="apple-touch-icon" href="logo.svg">
 
-    <meta name="theme-color" content="#ffffff">
+    <!-- 3. Android (PWA) App Settings -->
+    <meta name="theme-color" content="#f8f8f8">
     <link rel="manifest" href="manifest.json">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Libre Franklin', sans-serif; -webkit-tap-highlight-color: transparent; }
+        h1 { font-family: 'Frank Ruhl Libre', serif; }
+        
+        /* Christmas Snow Animation */
+        .snowflake { color: #fff; font-size: 1em; font-family: Arial; text-shadow: 0 0 1px #000; }
+        @-webkit-keyframes snowflakes-fall{0%{top:-10%}100%{top:100%}}@-webkit-keyframes snowflakes-shake{0%{-webkit-transform:translateX(0px);transform:translateX(0px)}50%{-webkit-transform:translateX(80px);transform:translateX(80px)}100%{-webkit-transform:translateX(0px);transform:translateX(0px)}}.snowflake{position:fixed;top:-10%;z-index:9999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;cursor:default;-webkit-animation-name:snowflakes-fall,snowflakes-shake;-webkit-animation-duration:10s,3s;-webkit-animation-timing-function:linear,ease-in-out;-webkit-animation-iteration-count:infinite,infinite;-webkit-animation-play-state:running,running}.snowflake:nth-of-type(0){left:1%;-webkit-animation-delay:0s,0s}.snowflake:nth-of-type(1){left:10%;-webkit-animation-delay:1s,1s}.snowflake:nth-of-type(2){left:20%;-webkit-animation-delay:6s,.5s}.snowflake:nth-of-type(3){left:30%;-webkit-animation-delay:4s,2s}.snowflake:nth-of-type(4){left:40%;-webkit-animation-delay:2s,2s}.snowflake:nth-of-type(5){left:50%;-webkit-animation-delay:8s,3s}.snowflake:nth-of-type(6){left:60%;-webkit-animation-delay:6s,2s}.snowflake:nth-of-type(7){left:70%;-webkit-animation-delay:2.5s,1s}.snowflake:nth-of-type(8){left:80%;-webkit-animation-delay:1s,0s}.snowflake:nth-of-type(9){left:90%;-webkit-animation-delay:3s,1.5s}
+    </style>
 </head>
-<body class="bg-[#f8f8f8] text-black min-h-screen flex flex-col items-center justify-center p-6">
+<body class="bg-[#f8f8f8] text-black min-h-screen flex flex-col items-center justify-center p-6 select-none">
 
     <!-- Simple Snow Effect -->
     <div class="snowflakes" aria-hidden="true">
@@ -28,22 +41,25 @@
 
     <div class="max-w-md w-full space-y-8 text-center relative z-10">
         <!-- Logo Area -->
-        <div class="space-y-4">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-red-700 text-white rounded-full shadow-lg mb-2">
-                <img src="path/to/your/logo.svg" alt="Christmas Connections Logo" class="w-8 h-8" />
+        <div class="space-y-4 flex flex-col items-center">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-red-700 text-white rounded-full shadow-lg mb-2 overflow-hidden ring-4 ring-red-800/20">
+                <!-- Fixed path: pointing directly to logo.svg -->
+                <img src="logo.svg" alt="Christmas Connections Logo" class="w-12 h-12" />
             </div>
-            <h1 class="text-4xl font-bold tracking-tight text-black">Christmas<br>Connections</h1>
-            <p class="text-gray-600 italic font-serif">A holiday game for the family</p>
+            <div>
+                <h1 class="text-4xl font-bold tracking-tight text-black">Christmas<br>Connections</h1>
+                <p class="text-gray-600 italic font-serif mt-2">A holiday game for the family</p>
+            </div>
         </div>
 
         <!-- Menu Buttons -->
-        <!-- EDIT HERE: Update the href to match your filenames -->
-        <div class="grid gap-4 mt-8">
+        <div class="grid gap-4 mt-8 w-full max-w-sm mx-auto">
             
             <a href="test.html" class="group relative w-full block">
                 <div class="absolute inset-0 bg-black rounded-lg translate-y-1 translate-x-1 transition-transform group-hover:translate-y-2 group-hover:translate-x-2"></div>
-                <div class="relative bg-white border-2 border-black rounded-lg p-4 text-lg font-bold uppercase tracking-wider hover:-translate-y-1 hover:-translate-x-1 transition-transform cursor-pointer">
-                    test puzzle
+                <div class="relative bg-white border-2 border-black rounded-lg p-4 text-lg font-bold uppercase tracking-wider hover:-translate-y-1 hover:-translate-x-1 transition-transform cursor-pointer flex items-center justify-between">
+                    <span>Test Puzzle</span>
+                    <span class="text-xs bg-yellow-400 px-2 py-1 rounded-full text-black border border-black">Debug</span>
                 </div>
             </a>
 
@@ -65,8 +81,10 @@
 
         <p class="text-xs text-gray-400 mt-12 font-sans">Made with ❤️ • Christmas 2025</p>
     </div>
+
+    <!-- SCRIPT: iOS Standalone Link Fix -->
+    <!-- This keeps the user inside the 'App' when clicking links on iPhone -->
     <script>
-        // iOS Standalone Link Fix
         if (("standalone" in window.navigator) && window.navigator.standalone) {
             var a = document.getElementsByTagName("a");
             for (var i = 0; i < a.length; i++) {
