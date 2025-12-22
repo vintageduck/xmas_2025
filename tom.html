@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Christmas Connections</title>
+
+    <!-- 1. The Logo (Favicon) -->
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- 2. iPhone (iOS) App Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Xmas Connect">
+    <link rel="apple-touch-icon" href="logo.svg">
+
+    <!-- 3. Android (PWA) App Settings -->
+    <meta name="theme-color" content="#ffffff">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- External Libraries (React, Tailwind, Confetti) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;700&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Libre Franklin', sans-serif; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        h1 { font-family: 'Frank Ruhl Libre', serif; }
+        
+        /* Animation Classes */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.2s ease-in-out 0s 2; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Modal Animation */
+        .modal-enter { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-white text-black min-h-screen select-none">
+
+    <div id="root"></div>
+
+    <!-- SCRIPT: iOS Standalone Link Fix (Keeps navigation inside the App) -->
+    <script>
+        if (("standalone" in window.navigator) && window.navigator.standalone) {
+            var a = document.getElementsByTagName("a");
+            for (var i = 0; i < a.length; i++) {
+                a[i].addEventListener("click", function(event) {
+                    var href = this.getAttribute("href");
+                    if (href && !href.startsWith("http") && !href.startsWith("#")) {
+                        event.preventDefault();
+                        window.location = href;
+                    }
+                }, false);
+            }
+        }
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ==========================================
+        // 🎄 CONFIGURATION SECTION - EDIT THIS! 🎄
+        // ==========================================
+        
+        // Who is this puzzle for? (Appears at top of screen)
+        const RECIPIENT_NAME = "Tom"; 
+
+        // The Puzzle Data (4 Groups of 4 Words)
+        const PUZZLE_DATA = [
+            {
+                level: 0, // Yellow (Easiest)
+                category: 'CARS',
+                members: ['FIRE TRUCK', 'BEETLE', 'GOLF', 'PANDA'],
+            },
+            {
+                level: 1, // Green
+                category: 'SPICE GIRLS SONGS',
+                members: ['DO IT', 'STOP', 'WANNABE', '2 BECOME 1'],
+            },
+            {
+                level: 2, // Blue
+                category: 'remove some letters and you basically get a disease or whatever idk',
+                members: ['CRICKET', 'PORTFOLIO', 'LEOPARD, ROSY', 'ON BOTH YOUR HOUSES'],
+            },
+            {
+                level: 3, // Purple (Hardest)
+                category: 'DUNE (2021)',
+                members: ['SPICE WORLD', 'ZENDAYA', 'BIG WORM', 'KNIFE CRIME'],
+            },
+        ];
+
+        // ==========================================
+        //       DO NOT EDIT BELOW THIS LINE
+        // ==========================================
+
+        const COLORS = {
+            0: 'bg-[#f9df6d]', // Yellow
+            1: 'bg-[#a0c35a]', // Green
+            2: 'bg-[#b0c4ef]', // Blue
+            3: 'bg-[#ba81c5]', // Purple
+        };
+
+        const EMOJIS = { 0: '🟨', 1: '🟩', 2: '🟦', 3: '🟪' };
+
+        // Help Modal Component
+        const HelpModal = ({ onClose }) => (
+            <div className="fixed inset-0 bg-white/95 z-50 flex flex-col items-center justify-center p-6 modal-enter">
+                <div className="max-w-md w-full space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-3xl font-bold font-serif">How to Play</h2>
+                        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                    </div>
+                    
+                    <div className="space-y-4 text-sm">
+                        <p>This is litterally the same game as the connections you play everyday</p>
+                        <ul className="list-disc pl-5 space-y-1">
+                            <li>Select four items and tap 'Submit' to check if your guess is correct.</li>
+                            <li>Find the groups without asking for help because thats boring and lame</li>
+                        </ul>
+                    </div>
+
+                    <div className="space-y-2">
+                        <p className="font-bold text-sm">Category Examples</p>
+                        <div className="text-xs space-y-1 text-gray-600">
+                            <p>Heroes: Darwin, Gandi, Roger Federer, Hugo</p>
+                            <p>Muppets: Kermit, Fozzy, Gonzo, Olliver Boardman</p>
+                        </div>
+                    </div>
+                    
+                    <button onClick={onClose} className="w-full bg-black text-white py-3 rounded-full font-bold uppercase tracking-wider">
+                        Wow... so cool...
+                    </button>
+                </div>
+            </div>
+        );
+
+        const App = () => {
+            const [items, setItems] = useState([]);
+            const [selected, setSelected] = useState([]);
+            const [solvedGroups, setSolvedGroups] = useState([]);
+            const [mistakes, setMistakes] = useState(4);
+            const [isShaking, setIsShaking] = useState(false);
+            const [message, setMessage] = useState(null);
+            const [gameOver, setGameOver] = useState(false); // Only used for winning now
+            const [guessHistory, setGuessHistory] = useState([]);
+            const [showHelp, setShowHelp] = useState(false);
+            const [infiniteMode, setInfiniteMode] = useState(false);
+
+            // Initialize and Shuffle
+            useEffect(() => {
+                const allWords = PUZZLE_DATA.flatMap((group) =>
+                    group.members.map((word) => ({ text: word, level: group.level }))
+                );
+                setItems(shuffle(allWords));
+            }, []);
+
+            // Trigger Confetti on Win
+            useEffect(() => {
+                if (solvedGroups.length === 4) {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#ff0000', '#00ff00', '#ffd700']
+                    });
+                }
+            }, [solvedGroups]);
+
+            const shuffle = (array) => {
+                const newArr = [...array];
+                for (let i = newArr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+                }
+                return newArr;
+            };
+
+            const handleSelect = (word) => {
+                if (selected.includes(word)) {
+                    setSelected(selected.filter((w) => w !== word));
+                } else if (selected.length < 4) {
+                    setSelected([...selected, word]);
+                }
+            };
+
+            const showToast = (msg) => {
+                setMessage(msg);
+                setTimeout(() => setMessage(null), 3000);
+            };
+
+            const handleSubmit = () => {
+                if (selected.length !== 4) return;
+
+                const selectedItems = items.filter((item) => selected.includes(item.text));
+                const levels = selectedItems.map((item) => item.level);
+                setGuessHistory([...guessHistory, levels]);
+
+                const allSameLevel = levels.every((l) => l === levels[0]);
+
+                if (allSameLevel) {
+                    const level = levels[0];
+                    const group = PUZZLE_DATA.find((g) => g.level === level);
+                    setSolvedGroups([...solvedGroups, group]);
+                    setItems(items.filter((item) => !selected.includes(item.text)));
+                    setSelected([]);
+
+                    if (solvedGroups.length === 3) {
+                        setGameOver(true);
+                        showToast('Excellent!');
+                    }
+                } else {
+                    setIsShaking(true);
+                    setTimeout(() => setIsShaking(false), 500);
+                    
+                    // Logic for Infinite Lives
+                    if (!infiniteMode) {
+                        const newMistakes = mistakes - 1;
+                        setMistakes(newMistakes);
+
+                        if (newMistakes === 0) {
+                            // ACTIVATE CHRISTMAS MIRACLE MODE
+                            setInfiniteMode(true);
+                            setMistakes(999); // Set to high number
+                            showToast('YOU SUCK! try again');
+                            return; 
+                        }
+                    }
+
+                    // Check "One away"
+                    const counts = {};
+                    levels.forEach(l => counts[l] = (counts[l] || 0) + 1);
+                    if (Object.values(counts).some(count => count === 3)) {
+                        showToast('One away...');
+                    }
+                }
+            };
+
+            const handleShare = async () => {
+                let grid = `Christmas Connections\n${RECIPIENT_NAME}'s Puzzle\n`;
+                guessHistory.forEach(guess => {
+                    grid += guess.map(level => EMOJIS[level]).join('') + '\n';
+                });
+
+                try {
+                    if (navigator.share) {
+                        await navigator.share({ title: 'Christmas Connections', text: grid });
+                    } else {
+                        await navigator.clipboard.writeText(grid);
+                        showToast('Copied to clipboard!');
+                    }
+                } catch (err) { console.log('Share failed', err); }
+            };
+
+            return (
+                <div className="flex flex-col items-center p-4 max-w-md mx-auto relative h-screen">
+                    
+                    {/* Help Modal */}
+                    {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+                    
+                    {/* Header */}
+                    <header className="w-full flex justify-between items-center py-4 border-b border-gray-200 mb-6">
+                        <a href="index.html" className="p-2 hover:bg-gray-100 rounded-full text-gray-600">
+                             {/* Back Arrow SVG */}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                        </a>
+                        <div className="text-center">
+                            <h1 className="text-2xl font-bold tracking-tighter">Connections</h1>
+                            <p className="text-xs uppercase tracking-widest text-gray-500 font-bold">{RECIPIENT_NAME}</p>
+                        </div>
+                        <div className="w-8">
+                             {/* Help Icon SVG - Now Clickable */}
+                             <button onClick={() => setShowHelp(true)} className="p-1 hover:bg-gray-100 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-black"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                             </button>
+                        </div>
+                    </header>
+
+                    {/* Toast */}
+                    {message && (
+                        <div className="fixed top-16 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-3 rounded-md shadow-lg z-50 font-bold whitespace-nowrap animate-bounce">
+                            {message}
+                        </div>
+                    )}
+
+                    {/* Solved Groups */}
+                    <div className="w-full space-y-2 mb-2">
+                        {solvedGroups.map((group) => (
+                            <div key={group.level} className={`${COLORS[group.level]} w-full h-20 rounded-md flex flex-col items-center justify-center p-2 fade-in`}>
+                                <h3 className="font-bold uppercase text-sm mb-1">{group.category}</h3>
+                                <p className="text-center text-xs uppercase">{group.members.join(', ')}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Grid */}
+                    <div className={`grid grid-cols-4 gap-2 w-full mb-8 ${isShaking ? 'animate-shake' : ''}`}>
+                        {items.map((item) => (
+                            <button
+                                key={item.text}
+                                onClick={() => handleSelect(item.text)}
+                                className={`
+                                    aspect-square rounded-md flex items-center justify-center p-1 font-bold uppercase transition-all duration-100 select-none
+                                    ${selected.includes(item.text) 
+                                        ? 'bg-[#5a594e] text-white scale-95' 
+                                        : 'bg-[#efefe6] hover:bg-[#d5d5cd] text-black'}
+                                `}
+                            >
+                                <span className={item.text.length > 8 ? 'text-[9px] sm:text-[10px]' : 'text-xs sm:text-sm'}>
+                                    {item.text}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Controls */}
+                    <div className="flex flex-col items-center w-full">
+                        <div className="flex items-center gap-2 mb-6">
+                            <span className="text-sm font-medium">Mistakes remaining:</span>
+                            <div className="flex gap-2 items-center">
+                                {/* If in Infinite Mode, show symbol, otherwise show bubbles */}
+                                {infiniteMode ? (
+                                     <span className="text-2xl font-bold animate-pulse">∞</span>
+                                ) : (
+                                    [...Array(4)].map((_, i) => (
+                                        <div key={i} className={`w-3 h-3 rounded-full transition-colors ${i < mistakes ? 'bg-[#5a594e]' : 'bg-gray-300'}`} />
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2 justify-center w-full mb-8">
+                            <button onClick={() => setItems(shuffle([...items]))} disabled={solvedGroups.length === 4} 
+                                className="px-4 py-3 border border-black rounded-full text-xs font-bold uppercase hover:bg-gray-100 disabled:opacity-30">
+                                Shuffle
+                            </button>
+                            <button onClick={() => setSelected([])} disabled={solvedGroups.length === 4 || selected.length === 0} 
+                                className="px-4 py-3 border border-black rounded-full text-xs font-bold uppercase hover:bg-gray-100 disabled:opacity-30">
+                                Deselect
+                            </button>
+                            <button onClick={handleSubmit} disabled={solvedGroups.length === 4 || selected.length !== 4} 
+                                className={`px-4 py-3 rounded-full text-xs font-bold uppercase transition-colors ${selected.length === 4 ? 'bg-black text-white hover:bg-gray-800' : 'border border-black text-gray-400 opacity-50'}`}>
+                                Submit
+                            </button>
+                        </div>
+
+                        {/* Results Grid & Share (Only shows when done) */}
+                        {(solvedGroups.length === 4) && (
+                            <div className="flex flex-col items-center w-full mt-2 space-y-6 fade-in pb-10">
+                                <div className="flex flex-col items-center">
+                                    <h3 className="font-bold uppercase text-xs mb-2 text-gray-400">Guess History</h3>
+                                    <div className="flex flex-col gap-1">
+                                        {guessHistory.map((guess, i) => (
+                                            <div key={i} className="flex gap-1">
+                                                {guess.map((level, j) => (
+                                                    <div key={j} className={`w-6 h-6 rounded-sm ${COLORS[level]}`}></div>
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                
+                                <button onClick={handleShare} className="bg-red-600 text-white px-8 py-3 rounded-full text-sm font-bold uppercase tracking-widest shadow-lg hover:bg-red-700 transition-colors animate-bounce">
+                                    Share Score 🎄
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
