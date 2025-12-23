@@ -162,26 +162,7 @@
             const [showHelp, setShowHelp] = useState(false);
             const [infiniteMode, setInfiniteMode] = useState(false);
 
-            // Initialize and Shuffle
-            useEffect(() => {
-                const allWords = PUZZLE_DATA.flatMap((group) =>
-                    group.members.map((word) => ({ text: word, level: group.level }))
-                );
-                setItems(shuffle(allWords));
-            }, []);
-
-            // Trigger Confetti on Win (Updated colors to Pink/Red/Gold)
-            useEffect(() => {
-                if (solvedGroups.length === 4) {
-                    confetti({
-                        particleCount: 150,
-                        spread: 70,
-                        origin: { y: 0.6 },
-                        colors: ['#ec4899', '#db2777', '#fbcfe8', '#ffd700'] 
-                    });
-                }
-            }, [solvedGroups]);
-
+            // Helper: Shuffle Array
             const shuffle = (array) => {
                 const newArr = [...array];
                 for (let i = newArr.length - 1; i > 0; i--) {
@@ -191,11 +172,81 @@
                 return newArr;
             };
 
+            // 1. Initialize Game (Load Save or Start New)
+            useEffect(() => {
+                const savedData = localStorage.getItem('christmasConnect_' + RECIPIENT_NAME);
+
+                if (savedData) {
+                    // --- LOAD GAME ---
+                    try {
+                        const data = JSON.parse(savedData);
+                        setSolvedGroups(data.solvedGroups || []);
+                        setMistakes(data.mistakes !== undefined ? data.mistakes : 4);
+                        setGuessHistory(data.guessHistory || []);
+                        setInfiniteMode(data.infiniteMode || false); 
+
+                        // Calculate which words are left based on what is solved
+                        const solvedWords = (data.solvedGroups || []).flatMap(g => g.members);
+                        const allWords = PUZZLE_DATA.flatMap((group) =>
+                            group.members.map((word) => ({ text: word, level: group.level }))
+                        );
+                        const remainingItems = allWords.filter(item => !solvedWords.includes(item.text));
+                        setItems(shuffle(remainingItems));
+                    } catch (e) {
+                        console.error("Error loading save:", e);
+                        // Fallback to new game if save is corrupted
+                        const allWords = PUZZLE_DATA.flatMap((group) =>
+                            group.members.map((word) => ({ text: word, level: group.level }))
+                        );
+                        setItems(shuffle(allWords));
+                    }
+                } else {
+                    // --- NEW GAME ---
+                    const allWords = PUZZLE_DATA.flatMap((group) =>
+                        group.members.map((word) => ({ text: word, level: group.level }))
+                    );
+                    setItems(shuffle(allWords));
+                }
+            }, []);
+
+            // 2. Auto-Save Effect
+            useEffect(() => {
+                // Only save if we have items or progress (prevents saving empty state on initial render)
+                if (items.length > 0 || solvedGroups.length > 0) {
+                    const gameState = {
+                        solvedGroups,
+                        mistakes,
+                        guessHistory,
+                        infiniteMode
+                    };
+                    localStorage.setItem('christmasConnect_' + RECIPIENT_NAME, JSON.stringify(gameState));
+                }
+            }, [solvedGroups, mistakes, guessHistory, infiniteMode, items]);
+
+            // Trigger Confetti on Win (Updated to Pink Theme Colors)
+            useEffect(() => {
+                if (solvedGroups.length === 4) {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#ec4899', '#db2777', '#fbcfe8', '#ffd700']
+                    });
+                }
+            }, [solvedGroups]);
+
             const handleSelect = (word) => {
                 if (selected.includes(word)) {
                     setSelected(selected.filter((w) => w !== word));
                 } else if (selected.length < 4) {
                     setSelected([...selected, word]);
+                }
+            };
+
+            const handleReset = () => {
+                if (window.confirm("Are you sure you want to reset the puzzle? You'll lose all progress.")) {
+                    localStorage.removeItem('christmasConnect_' + RECIPIENT_NAME);
+                    window.location.reload();
                 }
             };
 
@@ -356,6 +407,16 @@
                             <button onClick={handleSubmit} disabled={solvedGroups.length === 4 || selected.length !== 4} 
                                 className={`px-4 py-3 rounded-full text-xs font-bold uppercase transition-colors shadow-md ${selected.length === 4 ? 'bg-pink-600 text-white hover:bg-pink-700' : 'border border-pink-300 text-pink-300 opacity-50'}`}>
                                 Submit
+                            </button>
+                        </div>
+                        
+                        {/* Reset Button (Discrete) */}
+                        <div className="mb-8">
+                            <button 
+                                onClick={handleReset}
+                                className="text-[10px] text-pink-300 underline uppercase tracking-widest hover:text-red-500 transition-colors"
+                            >
+                                Reset Puzzle
                             </button>
                         </div>
 
