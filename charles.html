@@ -70,12 +70,13 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+
         // ==========================================
         // 🎄 CONFIGURATION SECTION - EDIT THIS! 🎄
         // ==========================================
         
         // Who is this puzzle for? (Appears at top of screen)
-        const RECIPIENT_NAME = "NAME GOES HERE"; 
+        const RECIPIENT_NAME = "charles"; 
 
         // The Puzzle Data (4 Groups of 4 Words)
         const PUZZLE_DATA = [
@@ -160,13 +161,66 @@
             const [showHelp, setShowHelp] = useState(false);
             const [infiniteMode, setInfiniteMode] = useState(false);
 
-            // Initialize and Shuffle
+            // Helper: Shuffle Array
+            const shuffle = (array) => {
+                const newArr = [...array];
+                for (let i = newArr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+                }
+                return newArr;
+            };
+
+            // 1. Initialize Game (Load Save or Start New)
             useEffect(() => {
-                const allWords = PUZZLE_DATA.flatMap((group) =>
-                    group.members.map((word) => ({ text: word, level: group.level }))
-                );
-                setItems(shuffle(allWords));
+                const savedData = localStorage.getItem('christmasConnect_' + RECIPIENT_NAME);
+
+                if (savedData) {
+                    // --- LOAD GAME ---
+                    try {
+                        const data = JSON.parse(savedData);
+                        setSolvedGroups(data.solvedGroups || []);
+                        setMistakes(data.mistakes !== undefined ? data.mistakes : 4);
+                        setGuessHistory(data.guessHistory || []);
+                        setInfiniteMode(data.infiniteMode || false); 
+
+                        // Calculate which words are left based on what is solved
+                        const solvedWords = (data.solvedGroups || []).flatMap(g => g.members);
+                        const allWords = PUZZLE_DATA.flatMap((group) =>
+                            group.members.map((word) => ({ text: word, level: group.level }))
+                        );
+                        const remainingItems = allWords.filter(item => !solvedWords.includes(item.text));
+                        setItems(shuffle(remainingItems));
+                    } catch (e) {
+                        console.error("Error loading save:", e);
+                        // Fallback to new game if save is corrupted
+                        const allWords = PUZZLE_DATA.flatMap((group) =>
+                            group.members.map((word) => ({ text: word, level: group.level }))
+                        );
+                        setItems(shuffle(allWords));
+                    }
+                } else {
+                    // --- NEW GAME ---
+                    const allWords = PUZZLE_DATA.flatMap((group) =>
+                        group.members.map((word) => ({ text: word, level: group.level }))
+                    );
+                    setItems(shuffle(allWords));
+                }
             }, []);
+
+            // 2. Auto-Save Effect
+            useEffect(() => {
+                // Only save if we have items or progress (prevents saving empty state on initial render)
+                if (items.length > 0 || solvedGroups.length > 0) {
+                    const gameState = {
+                        solvedGroups,
+                        mistakes,
+                        guessHistory,
+                        infiniteMode
+                    };
+                    localStorage.setItem('christmasConnect_' + RECIPIENT_NAME, JSON.stringify(gameState));
+                }
+            }, [solvedGroups, mistakes, guessHistory, infiniteMode, items]);
 
             // Trigger Confetti on Win
             useEffect(() => {
@@ -180,20 +234,18 @@
                 }
             }, [solvedGroups]);
 
-            const shuffle = (array) => {
-                const newArr = [...array];
-                for (let i = newArr.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
-                }
-                return newArr;
-            };
-
             const handleSelect = (word) => {
                 if (selected.includes(word)) {
                     setSelected(selected.filter((w) => w !== word));
                 } else if (selected.length < 4) {
                     setSelected([...selected, word]);
+                }
+            };
+
+            const handleReset = () => {
+                if (window.confirm("Are you sure you want to reset the puzzle? You'll lose all progress.")) {
+                    localStorage.removeItem('christmasConnect_' + RECIPIENT_NAME);
+                    window.location.reload();
                 }
             };
 
@@ -282,7 +334,7 @@
                             <p className="text-xs uppercase tracking-widest text-gray-500 font-bold">{RECIPIENT_NAME}</p>
                         </div>
                         <div className="w-8">
-                             {/* Help Icon SVG - Now Clickable */}
+                             {/* Help Icon SVG */}
                              <button onClick={() => setShowHelp(true)} className="p-1 hover:bg-gray-100 rounded-full">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-black"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
                              </button>
@@ -354,6 +406,16 @@
                             <button onClick={handleSubmit} disabled={solvedGroups.length === 4 || selected.length !== 4} 
                                 className={`px-4 py-3 rounded-full text-xs font-bold uppercase transition-colors ${selected.length === 4 ? 'bg-black text-white hover:bg-gray-800' : 'border border-black text-gray-400 opacity-50'}`}>
                                 Submit
+                            </button>
+                        </div>
+                        
+                        {/* Reset Button (Discrete) */}
+                        <div className="mb-8">
+                            <button 
+                                onClick={handleReset}
+                                className="text-[10px] text-gray-400 underline uppercase tracking-widest hover:text-red-500"
+                            >
+                                Reset Puzzle
                             </button>
                         </div>
 
