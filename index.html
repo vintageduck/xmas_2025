@@ -269,11 +269,5 @@
             document.getElementById('installModal').classList.add('hidden');
         }
     </script>
-    ```
-
-### Why this works well:
-* **The Tacky Sticker:** I used `animate-bounce` and `rotate-12` (12-degree tilt) to make it look like a sticker slapped on the screen. The bright yellow and red contrasts deliberately with your classy gold/white theme.
-* **Smart Dismissal:** The script checks `localStorage`. If the user hits the little 'X', it saves that preference and won't bug them again on reload.
-* **Auto-Hide:** I added a check for `isStandalone`. If the user actually *does* install the app and opens it from their home screen, the sticker will automatically hide itself because they’ve already succeeded!
 </body>
 </html>
