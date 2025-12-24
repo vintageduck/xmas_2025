@@ -183,5 +183,97 @@
             }
         }
     </script>
+    <div id="installSticker" class="fixed top-4 right-4 z-50 transform rotate-12 cursor-pointer group transition-transform hover:scale-110 hidden font-sans select-none">
+        <div class="relative bg-yellow-300 border-4 border-red-600 rounded-full p-3 shadow-[0_10px_20px_rgba(0,0,0,0.3)] animate-bounce">
+            
+            <button onclick="dismissSticker(event)" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md hover:bg-red-800 border-2 border-white">
+                ✕
+            </button>
+            
+            <div onclick="openInstallModal()" class="text-center font-black text-red-600 uppercase leading-none">
+                <span class="text-[10px] block text-black tracking-widest mb-1">App Mode</span>
+                <span class="text-sm">Save to</span>
+                <br>
+                <span class="text-xl">Phone</span>
+                <span class="text-2xl block mt-1 filter drop-shadow-sm">📲</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="installModal" class="fixed inset-0 bg-black/80 z-[60] hidden flex items-center justify-center p-4 backdrop-blur-sm select-none">
+        <div class="bg-white rounded-xl max-w-sm w-full p-6 shadow-2xl relative border-4 border-yellow-400 animate-in fade-in zoom-in duration-300">
+            
+            <button onclick="closeInstallModal()" class="absolute top-4 right-4 text-gray-400 hover:text-black bg-gray-100 rounded-full p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            
+            <h2 class="text-2xl font-black text-center mb-6 text-red-600 uppercase tracking-tighter transform -rotate-2">
+                Play in Full Screen
+            </h2>
+            
+            <div class="space-y-6">
+                <div class="flex gap-4 items-start bg-gray-50 p-3 rounded-lg">
+                    <div class="text-3xl">🍎</div>
+                    <div>
+                        <h3 class="font-bold text-lg leading-tight mb-1">iPhone / iPad</h3>
+                        <p class="text-sm text-gray-600 leading-snug">
+                            1. Tap the <strong class="text-blue-600">Share</strong> button <span class="inline-flex items-center justify-center bg-gray-200 rounded px-1 text-xs h-5">⎋</span><br>
+                            2. Scroll down & tap <br><strong class="text-black">Add to Home Screen</strong> <span class="inline-flex items-center justify-center bg-gray-200 rounded px-1 text-xs h-5">➕</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-start bg-gray-50 p-3 rounded-lg">
+                    <div class="text-3xl">🤖</div>
+                    <div>
+                        <h3 class="font-bold text-lg leading-tight mb-1">Android</h3>
+                        <p class="text-sm text-gray-600 leading-snug">
+                            1. Tap the <strong class="text-black">Menu</strong> (three dots)<br>
+                            2. Select <strong class="text-black">Install App</strong> or <strong class="text-black">Add to Home screen</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeInstallModal()" class="w-full mt-6 bg-black text-white font-bold py-3 rounded-lg hover:bg-gray-800 transition-colors uppercase tracking-widest text-sm shadow-lg">
+                Okay, Got it!
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Check if user has previously dismissed the sticker
+        const sticker = document.getElementById('installSticker');
+        const isDismissed = localStorage.getItem('stickerDismissed') === 'true';
+        
+        // Also check if they are ALREADY in standalone mode (no need to show if they already installed it)
+        const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
+        if (!isDismissed && !isStandalone) {
+            sticker.classList.remove('hidden');
+        }
+
+        // Close the sticker forever
+        function dismissSticker(e) {
+            e.stopPropagation(); // Stop the click from opening the modal
+            sticker.classList.add('hidden');
+            localStorage.setItem('stickerDismissed', 'true');
+        }
+
+        // Modal Open/Close logic
+        function openInstallModal() {
+            document.getElementById('installModal').classList.remove('hidden');
+        }
+
+        function closeInstallModal() {
+            document.getElementById('installModal').classList.add('hidden');
+        }
+    </script>
+    ```
+
+### Why this works well:
+* **The Tacky Sticker:** I used `animate-bounce` and `rotate-12` (12-degree tilt) to make it look like a sticker slapped on the screen. The bright yellow and red contrasts deliberately with your classy gold/white theme.
+* **Smart Dismissal:** The script checks `localStorage`. If the user hits the little 'X', it saves that preference and won't bug them again on reload.
+* **Auto-Hide:** I added a check for `isStandalone`. If the user actually *does* install the app and opens it from their home screen, the sticker will automatically hide itself because they’ve already succeeded!
 </body>
 </html>
