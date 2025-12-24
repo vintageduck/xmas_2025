@@ -1,15 +1,16 @@
 {
-  "name": "Christmas Connections",
-  "short_name": "Xmas Connect",
+  "name": "Hugo's Christmas Connections",
+  "short_name": "Hu York Times",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f8f8f8",
   "theme_color": "#f8f8f8",
   "icons": [
     {
-      "src": "logo.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
+      "src": "favicon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
