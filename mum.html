@@ -150,23 +150,26 @@
                     <h2 className="text-3xl font-bold text-center">How to Play</h2>
                     
                     <div className="space-y-4 text-sm font-medium">
-                        <p>This is litterally the same game as the connections you play everyday</p>
-                        <ul className="list-disc pl-5 space-y-2">
-                            <li>Select four items and tap 'Submit' to check if your guess is correct.</li>
-                            <li>Find the groups without asking for help because thats boring and lame</li>
-                        </ul>
+                        <p>Think of this as your very own episode of <em>Only Connect</em>.</p>
+                        <p>Just like Victoria Coren Mitchell (that nice lady we want to invite over for tea) would want, your task is to sort the clues into four groups of four.</p>                        <ul className="list-disc pl-5 space-y-2">
+                        
+                        <div className="bg-gray-50 p-4 rounded-lg text-left mx-auto">
+                            <ul className="list-disc pl-4 space-y-2">
+                                <li>Tap four items that share a connection.</li>
+                                <li>Press 'Submit' to check if you’ve found the link.</li>
+                            </ul>
                     </div>
 
                     <div className="space-y-2">
                         <p className="font-bold text-sm">Category Examples</p>
                         <div className="text-xs space-y-1 text-gray-500 font-medium">
-                            <p>Heroes: Darwin, Gandi, Roger Federer, Hugo</p>
-                            <p>Muppets: Kermit, Fozzy, Gonzo, Olliver Boardman</p>
+                            <p>Jones': Katherine (zeta), Peter (dragons den), Tom, Toby</p>
+                            <p>First 3 letters are a word: Matthew, Peter, Caroline, Rima</p>
                         </div>
                     </div>
                     
                     <button onClick={onClose} className="w-full bg-gold text-white py-3 rounded-full font-bold uppercase tracking-wider hover:bg-[#B08D4B] transition-colors">
-                        Wow... so cool...
+                        Thank you darling!
                     </button>
                 </div>
             </div>
@@ -295,7 +298,7 @@
                         if (newMistakes === 0) {
                             setInfiniteMode(true);
                             setMistakes(999); 
-                            showToast('YOU SUCK! try again');
+                            showToast('Out of lives! but I ❤️ U. Infinite lives!');
                             return; 
                         }
                     }
